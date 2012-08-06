@@ -162,21 +162,26 @@ foreach $doc (keys %drafts) {
     close FILE;
 }
 
-# For each RFC we're interested in, print out the list of drafts
-# which reference ANY
+# For each RFC we're interested in, grab the list of drafts
+# which reference ANY of the RFCs.
+%output = {};
 foreach $doc (keys %search) {
     # print out each draft that has a normative reference to the RFC
     foreach $ref (keys %{$rfc{$doc}}) {
 
 	# Unless we've already printed it out, via a reference to
 	# another RFC.
-	next if ($drafts{$ref}{'printed'});
+	next if (defined $output{$ref});
 
-	$drafts{$ref}{'printed'} = 1;
-	$padding = 50 - length($ref);
-
-	print $ref, ' ' x $padding, $drafts{$ref}{'state'}, "\n";
+	$output{$ref} = $drafts{$ref}{'state'};
     }
+}
+
+# and print them out in sorted order
+foreach $ref (sort {$a cmp $b} keys %output) {
+    $padding = 50 - length($ref);
+
+    print $ref, ' ' x $padding, $drafts{$ref}{'state'}, "\n";
 }
 
 exit 0;
