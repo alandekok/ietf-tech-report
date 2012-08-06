@@ -1,0 +1,71 @@
+This program helps determine which working group drafts reference
+particular technologies.  For example, the RADEXT working group can
+use it to determine which *other* working group documents reference
+RADIUS.  Those documents can then be reviewed by the RADEXT working
+group.
+
+It does this by:
+
+* grabbing a copy of the "internet-drafts" directory from ftp.rfc-editor.org
+
+* scanning the list of working group drafts
+
+* for each WG draft, scanning it to find the list of normative
+  references
+
+* for each interesting RFC, print out which drafts reference those
+  RFCS.
+
+USAGE:
+
+	$ make sync
+
+This uses 'rsync' to grab the set of drafts.  This may take 5-10
+minutes, depending on your system and network connection.  We
+recommend this be done once a day AT MOST.  Ideally, once a week.
+
+The main program is ietf-draft-scan.pl :
+
+	$ ./ietf-draft-scan.pl -r 2865 -W radext,dime
+
+Prints out a list of drafts (and status) which reference RFC 2865.
+The "radext" and "dime" working groups are exluded from the list.
+
+	$ /ietf-draft-scan.pl -r 2865,2866,2867,2868,2869,3162,3575,3579,3580,4675,5080,5090,5176,6158 -W radext,dime
+
+Prints out a more comprehensive list of drafts which reference any of
+the above RFCs.
+
+The only command-line options are -r and -W.
+
+USING MAKEFILE
+
+The above process can be simplified by editing the Makefile:
+
+	RFC = 1,2,3,4
+
+This is a comma-separated list of RFCs for a particular technology.
+
+	WGS = foo,bar
+
+This is a comma-separated list of working groups which have defined
+that technology.  Documents from these working groups are ignored.
+The idea is that (e.g. RADEXT) is familiar with RADIUS documents.    
+
+	$ make list.txt
+
+Will make the list as shown above.
+
+You can also do:
+
+	$ make mail.txt
+
+To make a message suitable for sending to a working group mailing
+list.  The header is in the file "top.txt".
+
+Finally,
+
+	$ make send
+
+Sends the email.  You will need to edit the FROM and TO lines of the
+Makefile.
