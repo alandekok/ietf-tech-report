@@ -43,6 +43,7 @@ use Getopt::Std;
 %search = {};			# option: search for drafts using these RFCs
 %opts = {};			# command-line options
 %wgs = {};			# working groups to ignore
+%tech = {};			# named technologies
 
 getopts('r:W:', \%opts);
 
@@ -51,6 +52,32 @@ getopts('r:W:', \%opts);
 # -r 2865,2866,3179
 foreach (split(/,/,$opts{'r'})) {
     $search{$_}++;
+}
+
+# Get the list of named technologies
+open FILE, "<tech.txt";
+while (<FILE>) {
+    next if (/^\s*#/);
+    s/#.*$//;
+    $_ =~ m/^(.*)\s+([\d,]+)$/;
+
+    $name = $1;
+    $list = $2;
+
+    foreach $doc (split /,/,$list) {
+	$tech{$name}{$doc}++;
+    }
+}
+close FILE;
+
+# Replace technology name by list of RFCs.
+foreach $ref (keys %search) {
+    next if ($ref =~ /^\d+/);
+    undef $search{$ref};
+
+    foreach $doc (keys %{$tech{$ref}}) {
+	$search{$doc}++;
+    }
 }
 
 # A list of Working groups to exclude.  It's a good idea to exclude the
@@ -134,7 +161,6 @@ foreach $doc (keys %drafts) {
 # For each RFC we're interested in, print out the list of drafts
 # which reference ANY
 foreach $doc (keys %search) {
-
     # print out each draft that has a normative reference to the RFC
     foreach $ref (keys %{$rfc{$doc}}) {
 
