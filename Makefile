@@ -15,10 +15,10 @@ sync:
 
 #internet-drafts/all_id.txt: sync
 
-radius.txt: internet-drafts/all_id.txt
+list.txt: internet-drafts/all_id.txt
 	@./ietf-draft-scan.pl -r $(RFCS) -W $(WGS) > $@
 
-mail.txt: top.txt radius.txt 
+mail.txt: top.txt list.txt 
 	@cp top.txt $@
 	@cat radius.txt >> $@
 
