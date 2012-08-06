@@ -1,5 +1,5 @@
   This is an automatically generated email.  It lists the IETF internet-drafts
-which are WG items; in IETF Last Call, and which reference RADIUS.  Drafts
+which are WG items and which reference RADIUS.  Drafts
 from the RADEXT and DIME working groups are not included.
 
 --
