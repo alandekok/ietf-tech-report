@@ -1,4 +1,17 @@
 #
 #  A list of technologies && relevant RFCs
 #
-radius 2865,2866,2867,2868,2869,3162,3575,3579,3580,4675,5080,5090,5176,6158
+
+# First word is the name of the technology.  Used in '-r foo'
+#
+# Numeric things are then assumed to be RFCs.
+# -foo means "ignore working group foo"
+radius -radext -dime 2865 2866 2867 2868 2869 3162 3575 3579 3580 4675 5080 5090 5176 6158
+
+# Not extensive
+smtp 2821
+
+# Not extensive
+dns 1034 1035 1101 2767 3338 4035 6195
+
+yang 6020

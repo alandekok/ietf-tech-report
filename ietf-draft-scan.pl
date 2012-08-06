@@ -58,14 +58,18 @@ foreach (split(/,/,$opts{'r'})) {
 open FILE, "<tech.txt";
 while (<FILE>) {
     next if (/^\s*#/);
-    s/#.*$//;
-    $_ =~ m/^(.*)\s+([\d,]+)$/;
+    m/^([^ ]+)\s+(.+)$/;
 
     $name = $1;
     $list = $2;
 
-    foreach $doc (split /,/,$list) {
-	$tech{$name}{$doc}++;
+    foreach $doc (split /\s/,$list) {
+	if ($doc =~ /^-/) {
+	    $doc =~ s/^-//;
+	    $wgs{$doc} = 0;
+	} else {
+	    $tech{$name}{$doc}++;
+	}
     }
 }
 close FILE;
