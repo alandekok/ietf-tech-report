@@ -16,7 +16,8 @@ It does this by:
 * for each interesting RFC, print out which drafts reference those
   RFCS.
 
-USAGE:
+
+USAGE
 
 	$ make sync
 
@@ -24,59 +25,83 @@ This uses 'rsync' to grab the set of drafts.  This may take 5-10
 minutes, depending on your system and network connection.  We
 recommend this be done once a day AT MOST.  Ideally, once a week.
 
-The main program is ietf-draft-scan.pl :
+The main program is ietf-tech-report :
 
-	$ ./ietf-draft-scan.pl -r radius
+	$ ./ietf-tech-report -r radius
 
-Finds internet-drafts which reference the "radius" technology.
+This prints a list of internet-drafts which reference the "radius"
+technology.
 
-TECHNOLOGIES:
 
-Are defined in the file "tech.txt".  See the file for a description.
-This file should be edited to add whatever technology you need.
+TECHNOLOGIES
 
-DETAILED USAGE:
+The technologies are defined in the file "tech.txt".  This file should
+be edited to add whatever technology you need.
 
-	$ ./ietf-draft-scan.pl -r 2865 -W radext,dime
+The format is pretty simple:
 
-Prints out a list of drafts (and status) which reference RFC 2865.
-The "radext" and "dime" working groups are exluded from the list.
+	NAME -WG -WG ### ### ###
 
-	$ /ietf-draft-scan.pl -r 2865,2866,2867,2868,2869,3162,3575,3579,3580,4675,5080,5090,5176,6158 -W radext,dime
+  NAME = name of the technology.  e.g. radius
+  -WF  = which working groups to avoid.  e.g. -radext -dime
+  #### = RFC number.  e.g. 2865 2866 2867
 
-Prints out a more comprehensive list of drafts which reference any of
-the above RFCs.
 
-The only command-line options are -r and -W.
+DETAILED USAGE
 
-USING MAKEFILE
+The program takes two command-line options, -r and -W.  Each is a
+comma-delimited list of words.  e.g. -r 2865,2866,2867.  -W
+radext,dime.
 
-The above process can be simplified by editing the Makefile:
+	$ ./ietf-tech-report -r 2865 -W radext,dime
 
-	RFC = 1,2,3,4
+This prints out a list of drafts (and status) which reference RFC
+2865.  The "radext" and "dime" working groups are exluded from the
+list.
 
-This is a comma-separated list of RFCs for a particular technology.
+	$ /ietf-tech-report -r 2865,2866,2867,2868,2869,3162,3575,3579,3580,4675,5080,5090,5176,6158 -W radext,dime
 
-	WGS = foo,bar
+This prints out a more comprehensive list of drafts which reference
+any of the above RFCs.
 
-This is a comma-separated list of working groups which have defined
-that technology.  Documents from these working groups are ignored.
-The idea is that (e.g. RADEXT) is familiar with RADIUS documents.    
+It is probably simpler to just use "-r radius".
 
-	$ make list.txt
 
-Will make the list as shown above.
+SENDING EMAIL
 
-You can also do:
+It is useful to send a weekly summary to a working group mailing list.
+To enable this, edit the Makefile, and set the following variables:
+
+	TECH = radius
+
+The technology to search for.
+
+	FROM = user@example.com
+
+The user to send mail "from".
+
+	TO = wg@ietf.org
+
+The name of the working group mailing list.  The "FROM" user must be
+subscribed to the list.
+
+Then:
 
 	$ make mail.txt
 
 To make a message suitable for sending to a working group mailing
 list.  The header is in the file "top.txt".
 
-Finally,
+Finally send the mail:
 
 	$ make send
 
-Sends the email.  You will need to edit the FROM and TO lines of the
-Makefile.
+
+CRON
+
+I suggest sending email once a week, via a cron job:
+
+	22 1 * * 0 /usr/bin/make -s -C /path/to/directory sync send
+
+Be warned that the "sync" portion might take 5-10 minutes.  You may
+want to wrap the cron job with a shell script.
