@@ -26,6 +26,17 @@ recommend this be done once a day AT MOST.  Ideally, once a week.
 
 The main program is ietf-draft-scan.pl :
 
+	$ ./ietf-draft-scan.pl -r radius
+
+Finds internet-drafts which reference the "radius" technology.
+
+TECHNOLOGIES:
+
+Are defined in the file "tech.txt".  See the file for a description.
+This file should be edited to add whatever technology you need.
+
+DETAILED USAGE:
+
 	$ ./ietf-draft-scan.pl -r 2865 -W radext,dime
 
 Prints out a list of drafts (and status) which reference RFC 2865.
