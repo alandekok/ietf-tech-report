@@ -34,3 +34,6 @@ dist: ietf-tech-report-$(VERSION).tar.gz
 ietf-tech-report-$(VERSION).tar.gz: .git
 	@git archive --format=tar --prefix=ietf-tech-report-$(VERSION)/ master | gzip > $@
 
+.PHONY: clean
+clean:
+	@rm -f list.txt message.txt
