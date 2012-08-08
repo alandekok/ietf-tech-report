@@ -10,7 +10,7 @@ TO = wg@example.com
 # Version of the software.
 VERSION = 1.0
 
-all: mail.txt
+all: message.txt
 
 .PHONY: sync
 sync:
@@ -21,12 +21,12 @@ sync:
 list.txt: internet-drafts/all_id.txt
 	@./ietf-tech-report $(TECH) > $@
 
-mail.txt: top.txt list.txt 
+message.txt: top.txt list.txt 
 	@cp top.txt $@
 	@cat list.txt >> $@
 
-send: mail.txt
-	@mail -aFrom:$(FROM) -s "Automatic tech report for `date`" $(TO) < mail.txt
+send: message.txt
+	@mail -aFrom:$(FROM) -s "Automatic tech report for `date`" $(TO) < message.txt
 
 .PHONY: dist
 dist: ietf-tech-report-$(VERSION).tar.gz
