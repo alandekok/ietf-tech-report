@@ -109,6 +109,10 @@ if (scalar keys %tech > 0) {
 }
 
 if (scalar keys %search == 0) {
+    if (scalar keys %tech > 0) {
+	die "FATAL: Failed to find ", join ' ', @ARGV, "\n";
+    }
+
     die "FATAL: Nothing to search for.\n";
 }
 
@@ -175,6 +179,8 @@ foreach $doc (keys %drafts) {
 #	       print "$doc --> $1\n";
 	       next;
 	   }
+
+	   # TO DO: have a smarter parser.
        }
     }
 
@@ -182,7 +188,7 @@ foreach $doc (keys %drafts) {
 }
 
 # For each RFC we're interested in, grab the list of drafts
-# which reference ANY of the RFCs.
+# which reference that RFC.  Cache the draft.
 %output = ();
 foreach $doc (keys %search) {
     # find each draft that has a normative reference to the RFC
@@ -191,7 +197,7 @@ foreach $doc (keys %search) {
     }
 }
 
-# and print them out in sorted order
+# and print out the drafts by name, in sorted order
 foreach $ref (sort {$a cmp $b} keys %output) {
     $padding = 50 - length($ref);
 
