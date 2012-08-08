@@ -23,7 +23,7 @@ list.txt: internet-drafts/all_id.txt
 
 mail.txt: top.txt list.txt 
 	@cp top.txt $@
-	@cat radius.txt >> $@
+	@cat list.txt >> $@
 
 send: mail.txt
 	@mail -aFrom:$(FROM) -s "Automatic tech report for `date`" $(TO) < mail.txt
