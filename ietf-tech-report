@@ -38,50 +38,24 @@
 #
 use Getopt::Std;
 
-%drafts = {};			# information about the draft
-%rfc = {};			# information about the RFC
-%search = {};			# option: search for drafts using these RFCs
-%opts = {};			# command-line options
-%wgs = {};			# working groups to ignore
-%tech = {};			# named technologies
+%drafts = ();			# information about the draft
+%rfc = ();			# information about the RFC
+%search = ();			# option: search for drafts using these RFCs
+%opts = ();			# command-line options
+%wgs = ();			# working groups to ignore
+%tech = ();			# named technologies
 
 getopts('r:W:', \%opts);
 
 # The arguments are just a list of RFCs to look for.
 #
 # -r 2865,2866,3179
-foreach (split(/,/,$opts{'r'})) {
+foreach (split(/,/, $opts{'r'})) {
+    if (! /^\d+$/) {
+	die "FATAL: Command line option is not a number: -r $_\n";
+    }
+
     $search{$_}++;
-}
-
-# Get the list of named technologies
-open FILE, "<tech.txt";
-while (<FILE>) {
-    next if (/^\s*#/);
-    m/^([^ ]+)\s+(.+)$/;
-
-    $name = $1;
-    $list = $2;
-
-    foreach $doc (split /\s/,$list) {
-	if ($doc =~ /^-/) {
-	    $doc =~ s/^-//;
-	    $wgs{$doc} = 0;
-	} else {
-	    $tech{$name}{$doc}++;
-	}
-    }
-}
-close FILE;
-
-# Replace technology name by list of RFCs.
-foreach $ref (keys %search) {
-    next if ($ref =~ /^\d+/);
-    undef $search{$ref};
-
-    foreach $doc (keys %{$tech{$ref}}) {
-	$search{$doc}++;
-    }
 }
 
 # A list of Working groups to exclude.  It's a good idea to exclude the
@@ -91,6 +65,51 @@ foreach $ref (keys %search) {
 # -W radext,dime
 foreach (split(/,/,$opts{'W'})) {
     $wgs{$_} = 0;
+}
+
+# The rest of the command-line arguments are the technologies to look for.
+foreach $name (@ARGV) {
+    $tech{$name}++;
+}
+
+# Get the list of named technologies
+if (scalar keys %tech > 0) {
+    open FILE, "<tech.txt";
+    $lineno = 0;
+
+    while (<FILE>) {
+	$lineno++;
+
+	s/#.*$//;
+	next if (/^\s*$/);
+
+	@words = split /\s/;
+
+	# ignore technologies that weren't named
+	next if (! defined $tech{$words[0]});
+	
+	shift @words;
+
+	# -WG #### -WG #### #### -WG
+	foreach $doc (@words) {
+	    # -foo means "ignore WG foo"
+	    if ($doc =~ /^-/) {
+		$doc =~ s/^-//;
+		$wgs{$doc} = 0;
+
+	    } elsif ($doc !~ /^\d+/) {
+		die "FATAL: tech.txt line $lineno unrecognized text '$doc'\n";
+
+	    } else {
+		$search{$doc}++;
+	    }
+	}
+    }
+    close FILE;
+}
+
+if (scalar keys %search == 0) {
+    die "FATAL: Nothing to search for.\n";
 }
 
 # Open the list of active internet drafts.
