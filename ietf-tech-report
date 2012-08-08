@@ -183,7 +183,7 @@ foreach $doc (keys %drafts) {
 
 # For each RFC we're interested in, grab the list of drafts
 # which reference ANY of the RFCs.
-%output = {};
+%output = ();
 foreach $doc (keys %search) {
     # find each draft that has a normative reference to the RFC
     foreach $ref (keys %{$rfc{$doc}}) {
