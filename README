@@ -22,12 +22,12 @@ USAGE
 	$ make sync
 
 This uses 'rsync' to grab the set of drafts.  This may take 5-10
-minutes, depending on your system and network connection.  We
-recommend this be done once a day AT MOST.  Ideally, once a week.
+minutes, depending on your system and network connection.  This should
+be done once a day AT MOST.  Ideally, once a week.
 
 The main program is ietf-tech-report :
 
-	$ ./ietf-tech-report -r radius
+	$ ./ietf-tech-report radius
 
 This prints a list of internet-drafts which reference the "radius"
 technology.
@@ -40,12 +40,14 @@ be edited to add whatever technology you need.
 
 The format is pretty simple:
 
-	NAME -WG -WG ### ### ###
+	NAME -WG -WG #### #### ####
 
   NAME = name of the technology.  e.g. radius
-  -WF  = which working groups to avoid.  e.g. -radext -dime
+  -WG  = which working groups to avoid.  e.g. -radext -dime
   #### = RFC number.  e.g. 2865 2866 2867
 
+This configuration allows you to just use NAME for a technology,
+rather than giving a list of RFCs.
 
 DETAILED USAGE
 
@@ -64,7 +66,7 @@ list.
 This prints out a more comprehensive list of drafts which reference
 any of the above RFCs.
 
-It is probably simpler to just use "-r radius".
+It is probably simpler to just use "./ietf-tech-report radius".
 
 
 SENDING EMAIL

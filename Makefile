@@ -19,7 +19,7 @@ sync:
 #internet-drafts/all_id.txt: sync
 
 list.txt: internet-drafts/all_id.txt
-	@./ietf-tech-report -r $(TECH) > $@
+	@./ietf-tech-report $(TECH) > $@
 
 mail.txt: top.txt list.txt 
 	@cp top.txt $@
