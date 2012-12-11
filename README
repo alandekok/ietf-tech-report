@@ -18,12 +18,17 @@ It does this by:
 
 
 USAGE
+-----
+
+The script needs a local copy of all of the internet drafts.  This is
+retrieved by running this command:
 
 	$ make sync
 
-This uses 'rsync' to grab the set of drafts.  This may take 5-10
-minutes, depending on your system and network connection.  This should
-be done once a day AT MOST.  Ideally, once a week.
+It uses 'rsync' to grab the drafts.  It may take 5-10 minutes,
+depending on your system and network connection.  The sync should be
+done once a day AT MOST.  Ideally, once a week.  Doing it more often
+will overload the IETF rsync server.
 
 The main program is ietf-tech-report :
 
@@ -34,9 +39,13 @@ technology.
 
 
 TECHNOLOGIES
+------------
 
-The technologies are defined in the file "tech.txt".  This file should
-be edited to add whatever technology you need.
+Instead of requiring you to remember lists of RFCs and working groups,
+this program uses a simple "technology" concept.  he technologies are
+defined in the file "tech.txt".  This file should be edited to add
+whatever data you need about a particular "technology".  Lists of
+RFCs, working groups, etc.
 
 The format is pretty simple:
 
@@ -47,32 +56,52 @@ The format is pretty simple:
   #### = RFC number.  e.g. 2865 2866 2867
 
 This configuration allows you to just use NAME for a technology,
-rather than giving a list of RFCs.
+rather than giving a list of RFCs.  The ability to exclude working
+groups comes because we presume that the WG is already aware of its
+own documents.  The purpose of this tool is to find documents in
+*other* working groups which use a technology.  They might not be
+aware of best practices, and you might not be aware of what they're
+doing.
+
 
 DETAILED USAGE
+--------------
 
-The program takes two command-line options, -r and -W.  Each is a
-comma-delimited list of words.  e.g. -r 2865,2866,2867.  -W
-radext,dime.
+The help text is as follows:
+
+	$ ./ietf-tech-report  -h
+	ietf-tech-report [-h] [-i] [-n] [-r LIST] [-W EXCLUDE]
+	   -h         print this message
+	   -i         include informative references, too
+	   -n         include normatice references (default)
+	   -r LIST    comma-separated list of key RFCs
+	   -W EXCLUDE comma-separated list of working groups to exclude
+	
+	              See the file 'tech.txt' for more configuration
+
+The '-r' and '-W' options take a comma-separated list of words.
+e.g. '-r 2865,2866,2867', or '-W radext,dime'.
 
 	$ ./ietf-tech-report -r 2865 -W radext,dime
 
 This prints out a list of drafts (and status) which reference RFC
-2865.  The "radext" and "dime" working groups are exluded from the
-list.
+2865.  The "radext" and "dime" working group douments are excluded
+from the list.
 
 	$ /ietf-tech-report -r 2865,2866,2867,2868,2869,3162,3575,3579,3580,4675,5080,5090,5176,6158 -W radext,dime
 
-This prints out a more comprehensive list of drafts which reference
-any of the above RFCs.
+This prints out a larger list of drafts which reference any of the
+above RFCs.
 
-It is probably simpler to just use "./ietf-tech-report radius".
+It is usually simpler to just use "./ietf-tech-report radius".
 
 
 SENDING EMAIL
+-------------
 
-It is useful to send a weekly summary to a working group mailing list.
-To enable this, edit the Makefile, and set the following variables:
+The Makefile can be edited to send a weekly summary to a working group
+mailing list.  To enable this, edit the Makefile, and set the
+following variables:
 
 	TECH = radius
 
@@ -100,10 +129,12 @@ Finally send the mail:
 
 
 CRON
+----
 
 I suggest sending email once a week, via a cron job:
 
 	22 1 * * 0 /usr/bin/make -s -C /path/to/directory sync send
 
 Be warned that the "sync" portion might take 5-10 minutes.  You may
-want to wrap the cron job with a shell script.
+want to run the "sync" first, and then 15 minutes later, run the
+"send" portion.
