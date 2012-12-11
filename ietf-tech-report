@@ -45,7 +45,19 @@ use Getopt::Std;
 %wgs = ();			# working groups to ignore
 %tech = ();			# named technologies
 
-getopts('inr:W:', \%opts);
+getopts('hinr:W:', \%opts);
+
+if ($opts{'h'}) {
+    print "ietf-tech-report [-h] [-i] [-n] [-r LIST] [-W EXCLUDE]\n";
+    print "   -h         print this message\n";
+    print "   -i         include informative references, too\n";
+    print "   -n         include normatice references (default)\n";
+    print "   -r LIST    comma-separated list of key RFCs\n";
+    print "   -W EXCLUDE comma-separated list of working groups to exclude\n";
+    print "\n";
+    print "              See the file 'tech.txt' for more configuration\n";
+    exit(1);
+}
 
 # The arguments are just a list of RFCs to look for.
 #
