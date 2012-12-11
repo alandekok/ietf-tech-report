@@ -45,7 +45,7 @@ use Getopt::Std;
 %wgs = ();			# working groups to ignore
 %tech = ();			# named technologies
 
-getopts('r:W:', \%opts);
+getopts('inr:W:', \%opts);
 
 # The arguments are just a list of RFCs to look for.
 #
@@ -140,47 +140,63 @@ while (<FILE>) {
 
 close FILE;
 
+sub check {
+    my $line = shift;
+    my $ref = shift;
+
+    # Look for [RFC2865]
+    if ($line =~ /\[RFC(\d+)\]/) {
+	$drafts{$doc}{$ref}{$1}++;
+	$rfc{$1}{$doc}++;
+#	       print "$doc --> $1\n";
+	return;
+    }
+
+    # Or maybe "RFC 2865,"
+    if ($line =~ /RFC (\d+),/) {
+	$drafts{$doc}{$ref}{$1}++;
+	$rfc{$1}{$doc}++;
+#	       print "$doc --> $1\n";
+	return;
+    }
+
+    # TO DO: have a smarter parser.
+}
+
 #
 #  Root through all of the drafts, finding the documents they reference.
 #
 foreach $doc (keys %drafts) {
     # Ignore ones which no longer exist.
     open FILE, "<internet-drafts/$doc.txt" or next;
-    $state = 0;
+    $normative = 0;
+    $informative = 0;
 
 #    print "? $doc\n";
 
    while (<FILE>) {
        # Ignore everything until we find the "Normative References" section.
-       if ($state == 0) {
-	   next unless (/^\d/);
-	   next unless (/\s*normative references\s*$/i);
-	   $state = 1;
+       if (/^\d/) {
+	   if (/\s*normative references\s*$/i) {
+	       $normative = $opts{'n'};
+	       $informative = 0;
+	   }
+	   
+	   if (/\s*informative references\s*$/i) {
+	       $informative = $opts{'i'};
+	       $normative = 0;
+	   }
+	   
 	   next;
        }
 
        # In the "normative references" section.
-       if ($state == 1) {
-	   # Stop processing the file if we see another section
-	   last if (/^\d/);
+       if ($normative) {
+	   check($_, 'normative');
+       }
 
-	   # Look for [RFC2865]
-	   if (/\[RFC(\d+)\]/) {
-	       $drafts{$doc}{'normative'}{$1}++;
-	       $rfc{$1}{$doc}++;
-#	       print "$doc --> $1\n";
-	       next;
-	   }
-
-	   # Or maybe "RFC 2865,"
-	   if (/RFC (\d+),/) {
-	       $drafts{$doc}{'normative'}{$1}++;
-	       $rfc{$1}{$doc}++;
-#	       print "$doc --> $1\n";
-	       next;
-	   }
-
-	   # TO DO: have a smarter parser.
+       if ($informative) {
+	   check($_, 'informative');
        }
     }
 
