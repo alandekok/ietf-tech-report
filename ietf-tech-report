@@ -44,13 +44,15 @@ use Getopt::Std;
 %opts = ();			# command-line options
 %wgs = ();			# working groups to ignore
 %tech = ();			# named technologies
+$keyword = "";
 
-getopts('hinr:W:', \%opts);
+getopts('hik:nr:W:', \%opts);
 
 if ($opts{'h'}) {
     print "ietf-tech-report [-h] [-i] [-n] [-r LIST] [-W EXCLUDE]\n";
     print "   -h         print this message\n";
     print "   -i         include informative references, too\n";
+    print "   -k         keyword(s) to look for\n";
     print "   -n         include normatice references (default)\n";
     print "   -r LIST    comma-separated list of key RFCs\n";
     print "   -W EXCLUDE comma-separated list of working groups to exclude\n";
@@ -82,6 +84,13 @@ foreach (split(/,/,$opts{'W'})) {
 # The rest of the command-line arguments are the technologies to look for.
 foreach $name (@ARGV) {
     $tech{$name}++;
+}
+
+if (! $opts{'k'}) {
+    undef $keyword;
+} else {
+    $keyword = $opts{'k'};
+    $keyword =~ tr/[A-Z]/[a-z]/;
 }
 
 # Get the list of named technologies
@@ -122,10 +131,12 @@ if (scalar keys %tech > 0) {
 
 if (scalar keys %search == 0) {
     if (scalar keys %tech > 0) {
-	die "FATAL: Failed to find ", join ' ', @ARGV, "\n";
+	if (!$keyword) {
+	    die "FATAL: Failed to find ", join ' ', @ARGV, "\n";
+	}
     }
 
-    die "FATAL: Nothing to search for.\n";
+#    die "FATAL: Nothing to search for.\n";
 }
 
 # Open the list of active internet drafts.
@@ -187,6 +198,11 @@ foreach $doc (keys %drafts) {
 #    print "? $doc\n";
 
    while (<FILE>) {
+       if ($keyword && !$rfc{$keyword}{$doc} && ($_ =~ /$keyword/i)) {
+	   $drafts{$doc}{"normative"}{$keyword}++;
+	   $rfc{$keyword}{$doc}++;
+       }
+
        # Ignore everything until we find the "Normative References" section.
        if (/^\d/) {
 	   if (/\s*normative references\s*$/i) {
@@ -218,7 +234,7 @@ foreach $doc (keys %drafts) {
 # For each RFC we're interested in, grab the list of drafts
 # which reference that RFC.  Cache the draft.
 %output = ();
-foreach $doc (keys %search) {
+foreach $doc (keys %search,$keyword) {
     # find each draft that has a normative reference to the RFC
     foreach $ref (keys %{$rfc{$doc}}) {
 	$output{$ref} = $drafts{$ref}{'state'};

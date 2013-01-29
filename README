@@ -73,6 +73,7 @@ The help text is as follows:
 	ietf-tech-report [-h] [-i] [-n] [-r LIST] [-W EXCLUDE]
 	   -h         print this message
 	   -i         include informative references, too
+	   -k         keyword(s) to look for
 	   -n         include normatice references (default)
 	   -r LIST    comma-separated list of key RFCs
 	   -W EXCLUDE comma-separated list of working groups to exclude
@@ -94,6 +95,10 @@ This prints out a larger list of drafts which reference any of the
 above RFCs.
 
 It is usually simpler to just use "./ietf-tech-report radius".
+
+It is also possible to generate a report by searching for a keyword.
+Only one keyword can be specified.  e.g. -k "performance metric".
+Searches are case insensitive.
 
 
 SENDING EMAIL
