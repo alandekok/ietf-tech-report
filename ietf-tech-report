@@ -44,28 +44,23 @@ use Getopt::Std;
 %opts = ();			# command-line options
 %wgs = ();			# working groups to ignore
 %tech = ();			# named technologies
-%notech = ();			# exclude ones which have normative references on these docs
 $keyword = "";
 
-getopts('hik:nN:r:W:', \%opts);
+getopts('hik:Nr:W:', \%opts);
 
 if ($opts{'h'}) {
-    print "ietf-tech-report [-h] [-i] [-n] [-N NAME] [-r LIST] [-W EXCLUDE] tech...\n";
+    print "ietf-tech-report [-h] [-i] [-N] [-r LIST] [-W EXCLUDE] tech...\n";
     print "   -h         print this message\n";
-    print "   -i         include informative references\n";
+    print "   -i         include informative references for the technologies\n";
     print "   -k         keyword(s) to look for\n";
-    print "   -n         include normative references (default)\n";
-    print "   -N NAME    exclude normative references on 'name'\n";
+    print "   -N         exclude normative references (default is to include them)\n";
     print "   -r LIST    comma-separated list of key RFCs\n";
     print "   -W EXCLUDE comma-separated list of working groups to exclude\n";
     print "\n";
     print "  The 'tech' is a list of RFCs or technologies to look for.\n";
-    print "              See the file 'tech.txt' for more configuration\n";
+    print "  See the file 'tech.txt' for more configuration\n";
     exit(1);
 }
-
-$opts{'n'} = 1;
-
 # The arguments are just a list of RFCs to look for.
 #
 # -r 2865,2866,3179
@@ -131,9 +126,6 @@ if (scalar keys %tech > 0) {
 
 	    } else {
 		$search{$doc}++;
-
-		# Remember that tech "foo" references doc "bar"
-		$notech{$doc}++;
 	    }
 	}
     }
@@ -214,8 +206,8 @@ foreach $doc (keys %drafts) {
 
        # Ignore everything until we find the "Normative References" section.
        if (/^\d/) {
-	   if (/\s*normative references\s*$/i) {
-	       $normative = $opts{'n'};
+	   if (/\s*normative references\s*$/i && !$opts{'N'}) {
+	       $normative = 1;
 	       $informative = 0;
 	   }
 	   
